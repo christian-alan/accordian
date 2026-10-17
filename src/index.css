@@ -1,0 +1,307 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, "SF Pro Text", Geist, system-ui, sans-serif;
+}
+
+:root {
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur: 520ms;
+  --r: 18px;
+  --gap: 10px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Themes -------------------------------------------------------------
+   light / dark  = Classic (follows the system appearance)
+   glass         = Liquid Glass (frosted cards over a vivid moving field)
+   ------------------------------------------------------------------------- */
+[data-theme="light"] {
+  --bg: #f5f6f8;
+  --fg: #16181d;
+  --muted: #696d78;
+  --icon: #3d414b;
+  --card: #ffffff;
+  --line: rgba(24, 28, 40, 0.09);
+  --line-top: rgba(24, 28, 40, 0.09);
+  --line-bottom: rgba(24, 28, 40, 0.09);
+  --hover: rgba(30, 36, 60, 0.045);
+  --sheen: transparent;
+  --lift: 0 14px 22px -16px rgba(20, 24, 40, 0.18);
+  --blur: none;
+  --toggle-track: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
+  --toggle-ring: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+  --toggle-thumb: #0a0a0a;
+  --toggle-thumb-ring: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --toggle-on: #ffffff;
+  --toggle-off: #7a7a7a;
+}
+
+[data-theme="dark"] {
+  --bg: #0c0d10;
+  --fg: #ecedf0;
+  --muted: #969aa4;
+  --icon: #c3c6cd;
+  --card: #16181c;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-top: rgba(255, 255, 255, 0.09);
+  --line-bottom: rgba(255, 255, 255, 0.06);
+  --hover: rgba(255, 255, 255, 0.05);
+  --sheen: transparent;
+  --lift: 0 16px 24px -16px rgba(0, 0, 0, 0.6);
+  --blur: none;
+  --toggle-track: linear-gradient(180deg, #2a2a2d 0%, #222225 100%);
+  --toggle-ring: inset 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --toggle-thumb: #f5f5f7;
+  --toggle-thumb-ring: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --toggle-on: #0a0a0a;
+  --toggle-off: #9a9aa0;
+}
+
+[data-theme="glass"] {
+  --bg: #e9dcf2;
+  --fg: #1a1426;
+  --muted: rgba(38, 28, 56, 0.72);
+  --icon: #2a2140;
+  --card: rgba(255, 255, 255, 0.26);
+  --line: rgba(255, 255, 255, 0.42);
+  --line-top: rgba(255, 255, 255, 0.85);
+  --line-bottom: rgba(255, 255, 255, 0.28);
+  --hover: rgba(255, 255, 255, 0.32);
+  --sheen: rgba(255, 255, 255, 0.55);
+  --lift: 0 22px 30px -20px rgba(60, 20, 90, 0.35);
+  --blur: blur(22px) saturate(185%);
+  --toggle-track: rgba(255, 255, 255, 0.22);
+  --toggle-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 6px 16px -6px rgba(60, 20, 90, 0.3);
+  --toggle-thumb: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.55) 100%);
+  --toggle-thumb-ring: inset 0 1px 0 #ffffff, 0 1px 3px rgba(60, 20, 90, 0.25);
+  --toggle-on: #1a1426;
+  --toggle-off: rgba(38, 28, 56, 0.7);
+}
+
+/* ---- Accordion ---------------------------------------------------------- */
+.acc-item {
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+  border-radius: 0;
+  transition:
+    margin-top var(--dur) var(--ease),
+    border-radius var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.acc-item[data-top] {
+  border-top-left-radius: var(--r);
+  border-top-right-radius: var(--r);
+}
+.acc-item[data-bottom] {
+  border-bottom-left-radius: var(--r);
+  border-bottom-right-radius: var(--r);
+  box-shadow: var(--lift);
+}
+.acc-item[data-gap] {
+  margin-top: var(--gap);
+}
+
+/* Tint + blur layer reaches past the item vertically so the blur has no
+   edge where two rows of the same card meet. The item clips it. */
+.acc-glass {
+  position: absolute;
+  inset: -32px 0;
+  pointer-events: none;
+  background: var(--card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  transition: background-color 400ms ease;
+}
+
+/* Outline: sides always, top and bottom only where the card has an edge. */
+.acc-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  border: 1px solid var(--line);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  pointer-events: none;
+  transition: border-color 300ms ease;
+}
+.acc-item[data-top]::before {
+  border-top-color: var(--line-top);
+}
+.acc-item[data-bottom]::before {
+  border-bottom-color: var(--line-bottom);
+}
+
+/* Glass specular rim along each card's top edge. */
+.acc-item[data-top]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  z-index: 3;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sheen), transparent);
+  pointer-events: none;
+}
+
+.acc-row {
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc-row::before {
+  content: "";
+  position: absolute;
+  inset: 4px 5px;
+  border-radius: calc(var(--r) - 5px);
+  background: var(--hover);
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 180ms ease,
+    transform 240ms var(--ease);
+}
+@media (hover: hover) {
+  .acc-row:hover::before {
+    opacity: 1;
+    transform: none;
+  }
+}
+.acc-row:active::before {
+  opacity: 1;
+  transform: scale(0.985);
+}
+.acc-row:focus-visible::before {
+  opacity: 1;
+  transform: none;
+  outline: 2px solid #2f7bea;
+  outline-offset: -1px;
+}
+
+.acc-chevron {
+  color: var(--muted);
+  transition:
+    transform var(--dur) var(--ease),
+    color 200ms ease;
+}
+.acc-item[data-open] .acc-chevron {
+  transform: rotate(-180deg);
+  color: var(--fg);
+}
+
+.acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease);
+}
+.acc-item[data-open] .acc-panel {
+  grid-template-rows: 1fr;
+}
+
+.acc-body {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(-6px);
+  transition:
+    opacity 260ms ease,
+    filter 300ms ease,
+    transform var(--dur) var(--ease);
+}
+.acc-item[data-open] .acc-body {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+  transition:
+    opacity 360ms ease 90ms,
+    filter 420ms ease 90ms,
+    transform var(--dur) var(--ease) 40ms;
+}
+
+/* ---- Glass field -------------------------------------------------------- */
+.glass-field {
+  background:
+    radial-gradient(60% 50% at 15% 20%, #ffb38a 0%, transparent 60%),
+    radial-gradient(55% 45% at 85% 25%, #8ec5ff 0%, transparent 62%),
+    radial-gradient(60% 55% at 75% 85%, #f59bd2 0%, transparent 60%),
+    radial-gradient(50% 50% at 20% 85%, #b8f0c8 0%, transparent 60%),
+    #e9dcf2;
+}
+.glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.glass-orb-a {
+  width: 240px;
+  height: 240px;
+  left: calc(50% - 250px);
+  top: calc(50% - 230px);
+  background: radial-gradient(circle at 35% 30%, #ffd36b, #ff6a3d 70%);
+}
+.glass-orb-b {
+  width: 180px;
+  height: 180px;
+  left: calc(50% + 70px);
+  top: calc(50% - 40px);
+  background: radial-gradient(circle at 35% 30%, #9be7ff, #3a5bff 75%);
+  animation-duration: 22s;
+  animation-delay: -6s;
+}
+.glass-orb-c {
+  width: 130px;
+  height: 130px;
+  left: calc(50% - 150px);
+  top: calc(50% + 120px);
+  background: radial-gradient(circle at 35% 30%, #ffc2ef, #c43ad6 75%);
+  animation-duration: 16s;
+  animation-delay: -3s;
+}
+.glass-stripe {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: calc(50% - 14px);
+  height: 28px;
+  background: repeating-linear-gradient(90deg, rgba(26, 20, 38, 0.85) 0 2px, transparent 2px 22px);
+  transform: rotate(-12deg);
+  opacity: 0.18;
+}
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, 30px) scale(1.08);
+  }
+  100% {
+    transform: translate(-30px, 50px) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 1ms;
+  }
+  .glass-orb {
+    animation: none;
+  }
+  .acc-body {
+    filter: none !important;
+    transform: none !important;
+  }
+}
